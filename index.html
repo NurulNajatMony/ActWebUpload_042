@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Web Upload & Management</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; background-color: #f4f6f9; }
+        .container { max-width: 800px; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin: 0 auto; }
+        .form-group { margin-bottom: 20px; padding: 15px; border: 1px dashed #ccc; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .btn-delete { color: red; text-decoration: none; font-weight: bold; cursor: pointer; }
+        .btn-download { color: green; text-decoration: none; font-weight: bold; }
+        .preview-img { max-width: 100px; max-height: 100px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Aplikasi Web Upload</h2>
+    
+    <div class="form-group">
+        <form action="upload.php" method="post" enctype="multipart/form-data">
+            <label style="font-weight: bold;">Pilih file untuk diunggah:</label><br><br>
+            <input type="file" name="fileToUpload" id="fileToUpload" required>
+            <br><br>
+            <input type="submit" value="Unggah File" name="submit">
+        </form>
+    </div>
+
+    <h3>Daftar File di Server (Preview, Unduh, & Delete)</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Nama File</th>
+                <th>Preview</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody id="fileTableBody">
+            </tbody>
+    </table>
+</div>
+
+<script>
+    // Fungsi untuk mengambil daftar file dari server secara otomatis
+    function loadFiles() {
+        fetch('upload.php?action=list')
+            .then(response => response.json())
+            .then(files => {
+                const tbody = document.getElementById('fileTableBody');
+                tbody.innerHTML = '';
+                
+                if (files.length === 0) {
+                    tbody.innerHTML = "tr><td colspan='3' style='text-align:center;'>Belum ada file yang diunggah.</td></tr>";
+                    return;
+                }
+
+                files.forEach(file => {
+                    const ext = file.split('.').pop().toLowerCase();
+                    let preview = `📄 Dokumen (.${ext})`;
+                    
+                    // Cek jika file adalah gambar untuk fitur PREVIEW
+                    if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) {
+                        preview = `<img src="uploads/${file}" class="preview-img" alt="preview">`;
+                    }
+
+                    const row = `<tr>
+                        <td>${file}</td>
+                        <td>${preview}</td>
+                        <td>
+                            <a class="btn-download" href="uploads/${file}" download>Unduh</a> | 
+                            <span class="btn-delete" onclick="deleteFile('${file}')">Hapus</span>
+                        </td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            });
+    }
+
+    // Fungsi untuk menghapus file (FITUR DELETE)
+    function deleteFile(filename) {
+        if (confirm('Yakin ingin menghapus file ini?')) {
+            fetch(`upload.php?action=delete&file=${encodeURIComponent(filename)}`)
+                .then(response => response.text())
+                .then(result => {
+                    alert(result);
+                    loadFiles(); // Refresh tabel setelah dihapus
+                });
+        }
+    }
+
+    // Jalankan fungsi saat halaman index.html dibuka
+    window.onload = loadFiles;
+</script>
+
+</body>
+</html>
