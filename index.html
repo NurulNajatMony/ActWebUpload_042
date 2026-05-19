@@ -39,7 +39,7 @@
             </tr>
         </thead>
         <tbody id="fileTableBody">
-            </tbody>
+        </tbody>
     </table>
 </div>
 
@@ -53,7 +53,7 @@
                 tbody.innerHTML = '';
                 
                 if (files.length === 0) {
-                    tbody.innerHTML = "tr><td colspan='3' style='text-align:center;'>Belum ada file yang diunggah.</td></tr>";
+                    tbody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>Belum ada file yang diunggah.</td></tr>";
                     return;
                 }
 
